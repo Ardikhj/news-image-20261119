@@ -1,21 +1,31 @@
-# news-image-20261119 entry (Python 3.13, standard library only).
-#
-# The entry image is entry.png beside this file: a 1024x1024 editorial
-# infographic drawn for Thursday 19 November 2026 (see make_image.py,
-# the generator that drew it). The grader runs this program with no
-# network, so it simply copies the committed image to /output/entry.png.
-#
-# Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for
-# /output:  mkdir -p out && MAKEFUN_OUTPUT_DIR=out python3 main.py
+#!/usr/bin/env python3
+"""Entrypoint for the news-image-20261119 entry.
 
+Copies the pre-rendered entry.png into the output directory (default "out",
+or $MAKEFUN_OUTPUT_DIR when set). The image itself is produced by
+make_image.py; this entrypoint only delivers it, so the run is fast and
+byte-identical every time.
+"""
 import os
 import shutil
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-OUT = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
 
-OUT.mkdir(parents=True, exist_ok=True)
-dest = OUT / "entry.png"
-shutil.copyfile(HERE / "entry.png", dest)
-print(f"wrote {dest} ({dest.stat().st_size} bytes)")
+
+def main():
+    out_dir = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "out"))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    src = HERE / "entry.png"
+    if not src.exists():
+        print("entry.png missing; run make_image.py first", file=sys.stderr)
+        return 1
+    dest = out_dir / "entry.png"
+    shutil.copyfile(src, dest)
+    print(f"wrote {dest} ({dest.stat().st_size} bytes)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
